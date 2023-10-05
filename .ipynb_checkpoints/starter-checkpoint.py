@@ -5,7 +5,7 @@ import datetime as dt
 import urllib.request, json
 import os
 import numpy as np
-# import tensorflow as tf # This code has been tested with TensorFlow 1.6
+import tensorflow as tf # This code has been tested with TensorFlow 1.6
 from sklearn.preprocessing import MinMaxScaler
 
 
@@ -57,3 +57,7 @@ df = df.sort_values('Date')
 
 df.head()
 
+
+high_prices = df.loc[:,'High'].as_matrix()
+low_prices = df.loc[:,'Low'].as_matrix()
+mid_prices = (high_prices+low_prices)/2.0
