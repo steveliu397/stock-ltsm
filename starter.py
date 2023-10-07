@@ -46,9 +46,6 @@ if data_source == 'alphavantage':
 
 else:
 
-    # ====================== Loading Data from Kaggle ==================================
-    # You will be using HP's data. Feel free to experiment with other data.
-    # But while doing so, be careful to have a large enough dataset and also pay attention to the data normalization
     df = pd.read_csv(os.path.join('Stocks','hpq.us.txt'),delimiter=',',usecols=['Date','Open','High','Low','Close'])
     print('Loaded data from the Kaggle repository')
 
@@ -57,3 +54,11 @@ df = df.sort_values('Date')
 
 df.head()
 
+high_prices = df.loc[:,'High'].as_matrix()
+low_prices = df.loc[:,'Low'].as_matrix()
+mid_prices = (high_prices+low_prices)/2.0
+
+train_data = mid_prices[:len(mid_prices) * 0.9]
+test_data = mid_prices[len(mid_prices) * 0.1:]
+
+print(len(mid_prices))
