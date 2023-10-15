@@ -12,7 +12,7 @@ DATA_SOURCE = 'alphavantage'
 API_KEY = '8NR1BD7HMN9AYF44'
 
 class DataReader:
-    ticker = 'AAL'
+    ticker = "AAL"
     file_to_save = ''
 
     def __init__(self, ticker, file_to_save):
