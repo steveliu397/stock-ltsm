@@ -9,6 +9,7 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from datareader import DataReader
 from datagenerator import DataGeneratorSeq
+import math
 # from datareader import [class name]
 
 # outsourced data-builidng to datareader.py
@@ -27,23 +28,25 @@ high_prices = df.loc[:,'High'].values
 low_prices = df.loc[:,'Low'].values
 mid_prices = (high_prices+low_prices)/2.0
 
-
-train_data = mid_prices[:5400]
-test_data = mid_prices[5400:]
+train_len = math.floor(len(mid_prices) * 0.9)
+train_data = mid_prices[:train_len]
+test_data = mid_prices[train_len:]
 
 scaler = MinMaxScaler()
 train_data = train_data.reshape(-1,1)
 test_data = test_data.reshape(-1,1)
 
 # Train the Scaler with training data and smooth data
-smoothing_window_size = 1250
-for di in range(0,5000,smoothing_window_size):
+window_len = 4
+smoothing_window_size = math.floor(train_len / window_len)
+for di in range(0,window_len*smoothing_window_size,smoothing_window_size):
     scaler.fit(train_data[di:di+smoothing_window_size,:])
     train_data[di:di+smoothing_window_size,:] = scaler.transform(train_data[di:di+smoothing_window_size,:])
 
 # You normalize the last bit of remaining data
-scaler.fit(train_data[di+smoothing_window_size:,:])
-train_data[di+smoothing_window_size:,:] = scaler.transform(train_data[di+smoothing_window_size:,:])
+if(train_len > window_len*smoothing_window_size):
+    scaler.fit(train_data[di+smoothing_window_size:,:])
+    train_data[di+smoothing_window_size:,:] = scaler.transform(train_data[di+smoothing_window_size:,:])
 
 # Reshape both train and test data
 train_data = train_data.reshape(-1)
@@ -55,7 +58,7 @@ test_data = scaler.transform(test_data).reshape(-1)
 # So the data will have a smoother curve than the original ragged data
 EMA = 0.0
 gamma = 0.1
-for ti in range(5400):
+for ti in range(train_len):
   EMA = gamma*train_data[ti] + (1-gamma)*EMA
   train_data[ti] = EMA
 
