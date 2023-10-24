@@ -9,7 +9,6 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
 
-
 class DataGeneratorSeq(object):
 
     def __init__(self,prices,batch_size,num_unroll):

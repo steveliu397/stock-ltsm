@@ -9,11 +9,11 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from datareader import DataReader
 from datagenerator import DataGeneratorSeq
+from datanormalization import Normalize
 import math
 # from datareader import [class name]
 
-# outsourced data-builidng to datareader.py
-
+# outsourced data builidng to datareader.py
 ticker = 'SPY'
 file_to_save = 'stock_market_data-%s.csv'%ticker
 
@@ -28,43 +28,12 @@ high_prices = df.loc[:,'High'].values
 low_prices = df.loc[:,'Low'].values
 mid_prices = (high_prices+low_prices)/2.0
 
-train_len = math.floor(len(mid_prices) * 0.9)
-train_data = mid_prices[:train_len]
-test_data = mid_prices[train_len:]
-
-scaler = MinMaxScaler()
-train_data = train_data.reshape(-1,1)
-test_data = test_data.reshape(-1,1)
-
-# Train the Scaler with training data and smooth data
+# outsourced data wrangling to datanormalization.py
 window_len = 4
-smoothing_window_size = math.floor(train_len / window_len)
-for di in range(0,window_len*smoothing_window_size,smoothing_window_size):
-    scaler.fit(train_data[di:di+smoothing_window_size,:])
-    train_data[di:di+smoothing_window_size,:] = scaler.transform(train_data[di:di+smoothing_window_size,:])
-
-# You normalize the last bit of remaining data
-if(train_len > window_len*smoothing_window_size):
-    scaler.fit(train_data[di+smoothing_window_size:,:])
-    train_data[di+smoothing_window_size:,:] = scaler.transform(train_data[di+smoothing_window_size:,:])
-
-# Reshape both train and test data
-train_data = train_data.reshape(-1)
-
-# Normalize test data
-test_data = scaler.transform(test_data).reshape(-1)
-
-# Now perform exponential moving average smoothing
-# So the data will have a smoother curve than the original ragged data
-EMA = 0.0
-gamma = 0.1
-for ti in range(train_len):
-  EMA = gamma*train_data[ti] + (1-gamma)*EMA
-  train_data[ti] = EMA
-
-# Used for visualization and test purposes
-all_mid_data = np.concatenate([train_data,test_data],axis=0)
-
+data_wrangler = Normalize(mid_prices, window_len)
+all_mid_data = data_wrangler.normalize()
+train_data = data_wrangler.get_train()
+test_data = data_wrangler.get_test()
 
 dg = DataGeneratorSeq(train_data,5,5)
 u_data, u_labels = dg.unroll_batches()
