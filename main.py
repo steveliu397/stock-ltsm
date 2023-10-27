@@ -198,7 +198,7 @@ x_axis_seq = []
 
 # Points you start your test predictions from
 # Changed input here for testing ---------------------------- need to integrate start, end and step into a method
-test_points_seq = np.arange(5432,6036,50).tolist()
+test_points_seq = np.arange(5432,6032,50).tolist()
 
 for ep in range(epochs):       
 
