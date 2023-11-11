@@ -8,7 +8,6 @@ import numpy as np
 # import tensorflow as tf # This code has been tested with TensorFlow 1.6
 from sklearn.preprocessing import MinMaxScaler
 
-
 class DataGeneratorSeq(object):
 
     def __init__(self,prices,batch_size,num_unroll):
