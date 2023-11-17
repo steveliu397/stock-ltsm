@@ -13,7 +13,8 @@ from sklearn.preprocessing import MinMaxScaler
 from datareader import DataReader
 from datagenerator import DataGeneratorSeq
 from datanormalization import Normalize
-from datadefinition import Definition
+from lstm_model import LSTMModel
+from lstm_optimization import LSTMOptimization
 import math
 # from datareader import [class name]
 
@@ -43,7 +44,6 @@ dg = DataGeneratorSeq(train_data,5,5)
 u_data, u_labels = dg.unroll_batches()
 
 
-
 D = 1 # Dimensionality of the data. Since your data is 1-D this would be 1
 num_unrollings = 50 # Number of time steps you look into the future.
 batch_size = 500 # Number of samples in a batch
@@ -53,16 +53,26 @@ dropout = 0.2 # dropout amount
 
 tf.compat.v1.reset_default_graph() # This is important in case you run this multiple times
 
-
-# Input data.
 train_inputs, train_outputs = [],[]
 
-define = Definition(D, num_unrollings, batch_size, num_nodes, n_layers, dropout, train_inputs, train_outputs)
-define.define_layers()
-define.regression()
-inc_gstep, optimizer, loss, tf_learning_rate, tf_min_learning_rate, sample_inputs, sample_prediction, reset_sample_states = define.calculate()
+for ui in range(num_unrollings):
+            tf.compat.v1.disable_eager_execution()
+            train_inputs.append(tf.compat.v1.placeholder(tf.float32, shape=[batch_size,D],name='train_inputs_%d'%ui))
+            train_outputs.append(tf.compat.v1.placeholder(tf.float32, shape=[batch_size,1], name = 'train_outputs_%d'%ui))
 
-# move into a class
+
+optimized_model = LSTMOptimization(D, num_unrollings, batch_size, num_nodes, n_layers, dropout, train_inputs, train_outputs)
+optimized_model.optimize()
+
+
+inc_gstep = optimized_model.get_inc_gstep()
+optimizer = optimized_model.get_optimizer()
+loss = optimized_model.get_loss()
+tf_learning_rate = optimized_model.get_tf_learning_rate()
+tf_min_learning_rate = optimized_model.get_tf_min_learning_rate()
+sample_inputs = optimized_model.get_sample_inputs()
+sample_prediction = optimized_model.get_sample_prediction()
+reset_sample_states = optimized_model.get_reset_sample_states()
 
 
 # Running the program
