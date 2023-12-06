@@ -52,8 +52,8 @@ class LSTMRun:
         self.sample_prediction = optimized_model.get_sample_prediction()
         self.reset_sample_states = optimized_model.get_reset_sample_states()
 
-    
-    def run(self):
+
+
         for ep in range(self.epochs):       
 
             # ========================= Training =====================================

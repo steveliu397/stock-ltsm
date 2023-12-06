@@ -31,8 +31,17 @@ class LSTMOptimization:
         self.state = model.get_state()
         self.split_outputs = model.get_split_outputs()
 
+        '''
+        self.inc_gstep = 0
+        self.optimizer = 
+        self.loss = 0.0
+        self.tf_learning_rate = 0.0
+        self.tf_min_learning_rate = 0.0
+        self.sample_prediction = 0
+        self.reset_sample_states = 0
+        '''
 
-    def optimize(self):
+
         print('Defining training Loss')
         self.loss = 0.0
         with tf.control_dependencies([tf.compat.v1.assign(self.c[li], self.state[li][0]) for li in range(self.n_layers)]+

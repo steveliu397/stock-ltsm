@@ -204,3 +204,107 @@ class LSTMOptimization:
     def get_reset_sample_states(self):
         return self.reset_sample_states
 
+
+for ep in range(epochs):       
+
+    # ========================= Training =====================================
+    for step in range(train_seq_length//batch_size):
+
+        u_data, u_labels = data_gen.unroll_batches()
+
+        feed_dict = {}
+        for ui,(dat,lbl) in enumerate(zip(u_data,u_labels)):            
+            feed_dict[train_inputs[ui]] = dat.reshape(-1,1)
+            feed_dict[train_outputs[ui]] = lbl.reshape(-1,1)
+
+        feed_dict.update({tf_learning_rate: 0.0001, tf_min_learning_rate:0.000001})
+
+        _, l = session.run([optimizer, loss], feed_dict=feed_dict)
+
+        average_loss += l
+
+    # ============================ Validation ==============================
+    if (ep+1) % valid_summary == 0:
+
+      average_loss = average_loss/(valid_summary*(train_seq_length//batch_size))
+
+      # The average loss
+      if (ep+1)%valid_summary==0:
+        print('Average loss at step %d: %f' % (ep+1, average_loss))
+
+      train_mse_ot.append(average_loss)
+
+      average_loss = 0 # reset loss
+
+      predictions_seq = []
+
+      mse_test_loss_seq = []
+
+      # ===================== Updating State and Making Predicitons ========================
+      for w_i in test_points_seq:
+        mse_test_loss = 0.0
+        our_predictions = []
+
+        if (ep+1)-valid_summary==0:
+          # Only calculate x_axis values in the first validation epoch
+          x_axis=[]
+
+        # Feed in the recent past behavior of stock prices
+        # to make predictions from that point onwards
+        for tr_i in range(w_i-num_unrollings+1,w_i-1):
+          current_price = all_mid_data[tr_i]
+          feed_dict[sample_inputs] = np.array(current_price).reshape(1,1)    
+          _ = session.run(sample_prediction,feed_dict=feed_dict)
+
+        feed_dict = {}
+
+        current_price = all_mid_data[w_i-1]
+
+        feed_dict[sample_inputs] = np.array(current_price).reshape(1,1)
+
+        # Make predictions for this many steps
+        # Each prediction uses previous prediciton as it's current input
+        for pred_i in range(n_predict_once):
+
+          pred = session.run(sample_prediction,feed_dict=feed_dict)
+
+          our_predictions.append(np.ndarray.item(pred))
+
+          feed_dict[sample_inputs] = np.asarray(pred).reshape(-1,1)
+
+          if (ep+1)-valid_summary==0:
+            # Only calculate x_axis values in the first validation epoch
+            x_axis.append(w_i+pred_i)
+
+          mse_test_loss += 0.5*(pred-all_mid_data[w_i+pred_i])**2
+
+        session.run(reset_sample_states)
+
+        predictions_seq.append(np.array(our_predictions))
+
+        mse_test_loss /= n_predict_once
+        mse_test_loss_seq.append(mse_test_loss)
+
+        if (ep+1)-valid_summary==0:
+          x_axis_seq.append(x_axis)
+
+      current_test_mse = np.mean(mse_test_loss_seq)
+
+      # Learning rate decay logic
+      if len(test_mse_ot)>0 and current_test_mse > min(test_mse_ot):
+          loss_nondecrease_count += 1
+      else:
+          loss_nondecrease_count = 0
+
+      if loss_nondecrease_count > loss_nondecrease_threshold :
+            session.run(inc_gstep)
+            loss_nondecrease_count = 0
+            print('\tDecreasing learning rate by 0.5')
+
+      test_mse_ot.append(current_test_mse)
+      print('\tTest MSE: %.5f'%np.mean(mse_test_loss_seq))
+      predictions_over_time.append(predictions_seq)
+      print('\tFinished Predictions')
+
+
+
