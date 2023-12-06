@@ -4,9 +4,11 @@ import pandas as pd
 import datetime as dt
 import urllib.request, json
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+# os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import numpy as np
 import tensorflow as tf
+import keras
+from keras import layers
 from sklearn.preprocessing import MinMaxScaler
 import math
 from lstm_optimization import LSTMOptimization
@@ -17,7 +19,7 @@ class LSTMRun:
 
     def __init__(self, D, num_unrollings, batch_size, num_nodes, n_layers, dropout, train_inputs, train_outputs,
                  epochs, valid_summary, n_predict_once, train_seq_length, train_mse_ot, test_mse_ot, predictions_over_time,
-                 session, loss_nondecrease_count, loss_nondecrease_threshold, data_gen, average_loss, x_axis_seq, test_points_seq,
+                 loss_nondecrease_count, loss_nondecrease_threshold, data_gen, average_loss, x_axis_seq, test_points_seq,
                  all_mid_data):
         optimized_model = LSTMOptimization(D, num_unrollings, batch_size, num_nodes, n_layers, dropout, train_inputs, train_outputs)
 
@@ -33,7 +35,7 @@ class LSTMRun:
         self.train_mse_ot = train_mse_ot
         self.test_mse_ot = test_mse_ot
         self.predictions_over_time = predictions_over_time
-        self.session = session
+        
         self.loss_nondecrease_count = loss_nondecrease_count
         self.loss_nondecrease_threshold = loss_nondecrease_threshold
         self.data_gen = data_gen
@@ -53,6 +55,10 @@ class LSTMRun:
         self.reset_sample_states = optimized_model.get_reset_sample_states()
 
 
+    def run(self):
+        session = tf.compat.v1.InteractiveSession()
+        init = tf.compat.v1.global_variables_initializer()
+        session.run(init)
 
         for ep in range(self.epochs):       
 
@@ -68,7 +74,7 @@ class LSTMRun:
 
                 feed_dict.update({self.tf_learning_rate: 0.0001, self.tf_min_learning_rate:0.000001})
 
-                _, l = self.session.run([self.optimizer, self.loss], feed_dict=feed_dict)
+                _, l = session.run([self.optimizer, self.loss], feed_dict=feed_dict)
 
                 self.average_loss += l
 
@@ -103,7 +109,7 @@ class LSTMRun:
                     for tr_i in range(w_i-self.num_unrollings+1,w_i-1):
                         current_price = self.all_mid_data[tr_i]
                         feed_dict[self.sample_inputs] = np.array(current_price).reshape(1,1)    
-                        _ = self.session.run(self.sample_prediction,feed_dict=feed_dict)
+                        _ = session.run(self.sample_prediction,feed_dict=feed_dict)
 
                     feed_dict = {}
 
@@ -115,7 +121,7 @@ class LSTMRun:
                     # Each prediction uses previous prediciton as it's current input
                     for pred_i in range(self.n_predict_once):
 
-                        pred = self.session.run(self.sample_prediction,feed_dict=feed_dict)
+                        pred = session.run(self.sample_prediction,feed_dict=feed_dict)
 
                         our_predictions.append(np.ndarray.item(pred))
 
@@ -127,7 +133,7 @@ class LSTMRun:
 
                         mse_test_loss += 0.5*(pred-self.all_mid_data[w_i+pred_i])**2
 
-                    self.session.run(self.reset_sample_states)
+                    session.run(self.reset_sample_states)
 
                     predictions_seq.append(np.array(our_predictions))
 
@@ -146,7 +152,7 @@ class LSTMRun:
                     self.loss_nondecrease_count = 0
 
                 if self.loss_nondecrease_count > self.loss_nondecrease_threshold :
-                    self.session.run(self.inc_gstep)
+                    session.run(self.inc_gstep)
                     self.loss_nondecrease_count = 0
                     print('\tDecreasing learning rate by 0.5')
 

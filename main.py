@@ -88,9 +88,9 @@ train_mse_ot = [] # Accumulate Train losses
 test_mse_ot = [] # Accumulate Test loss
 predictions_over_time = [] # Accumulate predictions
 
-session = tf.compat.v1.InteractiveSession()
 
-tf.compat.v1.global_variables_initializer().run()
+
+
 
 # Used for decaying learning rate
 loss_nondecrease_count = 0
@@ -108,13 +108,10 @@ x_axis_seq = []
 # Changed input here for testing ---------------------------- need to integrate start, end and step into a method
 test_points_seq = np.arange(5432,6032,50).tolist()
 
-# *************************************************************************************************************************
-# Optional: running LSTM (the code below) can be outsourced using following lines
-# Requires removing lines 64 to 75
+
 
 lstm_run = LSTMRun(D, num_unrollings, batch_size, num_nodes, n_layers, dropout, train_inputs, train_outputs,
-                epochs, valid_summary, n_predict_once, train_seq_length, train_mse_ot, test_mse_ot, predictions_over_time,
-                session, loss_nondecrease_count, loss_nondecrease_threshold, data_gen, average_loss, x_axis_seq, test_points_seq,
+                epochs, valid_summary, n_predict_once, train_seq_length, train_mse_ot, test_mse_ot, predictions_over_time, loss_nondecrease_count, loss_nondecrease_threshold, data_gen, average_loss, x_axis_seq, test_points_seq,
                 all_mid_data)
+lstm_run.run()
 
-# *************************************************************************************************************************
