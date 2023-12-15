@@ -41,9 +41,6 @@ all_mid_data = data_wrangler.normalize()
 train_data = data_wrangler.get_train()
 test_data = data_wrangler.get_test()
 
-dg = DataGeneratorSeq(train_data,5,5)
-u_data, u_labels = dg.unroll_batches()
-
 
 num_unrollings = 50 # Number of time steps you look into the future.
 batch_size = 500 # Number of samples in a batch
@@ -57,9 +54,7 @@ tf.compat.v1.reset_default_graph() # This is important in case you run this mult
 # Running the program
 epochs = 30
 valid_summary = 1 # Interval you make test predictions
-
 n_predict_once = 50 # Number of steps you continously predict for
-
 train_seq_length = len(train_data) # Full length of the training data
 
 

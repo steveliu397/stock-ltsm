@@ -21,7 +21,7 @@ class LSTMRun:
                  epochs, valid_summary, n_predict_once, train_seq_length,
                  loss_nondecrease_count, loss_nondecrease_threshold, data_gen, average_loss, test_points_seq,
                  all_mid_data):
-        D = 1   # The data is 1D in this model
+        D = 1 # The data is 1D in this model
 
         train_inputs, train_outputs = [],[]
 
