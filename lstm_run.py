@@ -17,10 +17,19 @@ from lstm_optimization import LSTMOptimization
 # Outsourced code to run the LSTM, for consideration
 class LSTMRun:
 
-    def __init__(self, D, num_unrollings, batch_size, num_nodes, n_layers, dropout, train_inputs, train_outputs,
-                 epochs, valid_summary, n_predict_once, train_seq_length, train_mse_ot, test_mse_ot, predictions_over_time,
-                 loss_nondecrease_count, loss_nondecrease_threshold, data_gen, average_loss, x_axis_seq, test_points_seq,
+    def __init__(self, num_unrollings, batch_size, num_nodes, n_layers, dropout,
+                 epochs, valid_summary, n_predict_once, train_seq_length,
+                 loss_nondecrease_count, loss_nondecrease_threshold, data_gen, average_loss, test_points_seq,
                  all_mid_data):
+        D = 1   # The data is 1D in this model
+
+        train_inputs, train_outputs = [],[]
+
+        for ui in range(num_unrollings):
+                    tf.compat.v1.disable_eager_execution()
+                    train_inputs.append(tf.compat.v1.placeholder(tf.float32, shape=[batch_size,D],name='train_inputs_%d'%ui))
+                    train_outputs.append(tf.compat.v1.placeholder(tf.float32, shape=[batch_size,1], name = 'train_outputs_%d'%ui))
+
         optimized_model = LSTMOptimization(D, num_unrollings, batch_size, num_nodes, n_layers, dropout, train_inputs, train_outputs)
 
         self.num_unrollings = num_unrollings
@@ -32,15 +41,15 @@ class LSTMRun:
         self.valid_summary = valid_summary
         self.n_predict_once = n_predict_once
         self.train_seq_length = train_seq_length
-        self.train_mse_ot = train_mse_ot
-        self.test_mse_ot = test_mse_ot
-        self.predictions_over_time = predictions_over_time
+        self.train_mse_ot = []
+        self.test_mse_ot = []
+        self.predictions_over_time = []
         
         self.loss_nondecrease_count = loss_nondecrease_count
         self.loss_nondecrease_threshold = loss_nondecrease_threshold
         self.data_gen = data_gen
         self.average_loss = average_loss
-        self.x_axis_seq = x_axis_seq
+        self.x_axis_seq = []
         self.test_points_seq = test_points_seq
 
         self.all_mid_data = all_mid_data

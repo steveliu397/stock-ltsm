@@ -14,10 +14,9 @@ from lstm_model import LSTMModel
 
 class LSTMOptimization:
     
-    def __init__(self, D, num_unrollings, batch_size, num_nodes, n_layers, dropout, train_inputs, train_outputs):
-        model = LSTMModel(D, num_unrollings, batch_size, num_nodes, n_layers, dropout, train_inputs)
+    def __init__(D, self, num_unrollings, batch_size, num_nodes, n_layers, dropout, train_inputs, train_outputs):
+        model = LSTMModel(num_unrollings, batch_size, num_nodes, n_layers, dropout, train_inputs)
 
-        self.D = D
         self.num_unrollings = num_unrollings
         self.num_nodes = num_nodes
         self.n_layers = n_layers
@@ -72,7 +71,7 @@ class LSTMOptimization:
 
         print('Defining prediction related TF functions')
 
-        self.sample_inputs = tf.compat.v1.placeholder(tf.float32, shape=[1,self.D])
+        self.sample_inputs = tf.compat.v1.placeholder(tf.float32, shape=[1,D])
 
         # Maintaining LSTM state for prediction stage
         sample_c, sample_h, initial_sample_state = [],[],[]

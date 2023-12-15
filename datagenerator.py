@@ -51,5 +51,3 @@ class DataGeneratorSeq(object):
     def reset_indices(self):
         for b in range(self._batch_size):
             self._cursor[b] = np.random.randint(0,min((b+1)*self._segments,self._prices_length-1))
-
-

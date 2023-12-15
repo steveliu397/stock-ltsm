@@ -13,7 +13,7 @@ import math
 
 class LSTMModel:
 
-    def __init__(self, D, num_unrollings, batch_size, num_nodes, n_layers, dropout, train_inputs):
+    def __init__(self, num_unrollings, batch_size, num_nodes, n_layers, dropout, train_inputs):
         lstm_cells = [
         tf.compat.v1.nn.rnn_cell.LSTMCell(num_units=num_nodes[li],
                             state_is_tuple=True,

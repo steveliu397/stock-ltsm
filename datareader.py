@@ -42,6 +42,3 @@ class DataReader:
         # move this to starter
         else:
             raise Exception('Cannot be found using Alpha Vantage')
-
-
-

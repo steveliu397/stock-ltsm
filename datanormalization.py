@@ -58,6 +58,3 @@ class Normalize:
     
     def get_test(self):
         return self.test_data
-
-
-
