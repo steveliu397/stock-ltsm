@@ -14,7 +14,7 @@ from lstm_model import LSTMModel
 
 class LSTMOptimization:
     
-    def __init__(D, self, num_unrollings, batch_size, num_nodes, n_layers, dropout, train_inputs, train_outputs):
+    def __init__(self, D, num_unrollings, batch_size, num_nodes, n_layers, dropout, train_inputs, train_outputs):
         model = LSTMModel(num_unrollings, batch_size, num_nodes, n_layers, dropout, train_inputs)
 
         self.num_unrollings = num_unrollings
