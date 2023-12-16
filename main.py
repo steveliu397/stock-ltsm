@@ -74,8 +74,7 @@ data_gen = DataGeneratorSeq(train_data,batch_size,num_unrollings)
 test_points_seq = np.arange(5432,6032,50).tolist()
 
 
-lstm_run = LSTMRun(num_unrollings, batch_size, num_nodes, n_layers, dropout,
-                epochs, valid_summary, n_predict_once, train_seq_length, 
-                loss_nondecrease_count, loss_nondecrease_threshold, data_gen, 
-                average_loss, test_points_seq, all_mid_data)
+lstm_run = LSTMRun(num_unrollings, batch_size, num_nodes, n_layers, dropout, epochs, valid_summary, n_predict_once, 
+                   train_seq_length, loss_nondecrease_count, loss_nondecrease_threshold, data_gen, average_loss, 
+                   test_points_seq, all_mid_data)
 lstm_run.run()

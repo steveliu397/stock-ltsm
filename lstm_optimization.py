@@ -17,11 +17,6 @@ class LSTMOptimization:
     def __init__(self, D, num_unrollings, batch_size, num_nodes, n_layers, dropout, train_inputs, train_outputs):
         model = LSTMModel(num_unrollings, batch_size, num_nodes, n_layers, dropout, train_inputs)
 
-        self.num_unrollings = num_unrollings
-        self.num_nodes = num_nodes
-        self.n_layers = n_layers
-        self.train_outputs = train_outputs
-
         self.c = model.get_c()
         self.h = model.get_h()
         self.w = model.get_w()
@@ -30,23 +25,13 @@ class LSTMOptimization:
         self.state = model.get_state()
         self.split_outputs = model.get_split_outputs()
 
-        '''
-        self.inc_gstep = 0
-        self.optimizer = 
-        self.loss = 0.0
-        self.tf_learning_rate = 0.0
-        self.tf_min_learning_rate = 0.0
-        self.sample_prediction = 0
-        self.reset_sample_states = 0
-        '''
-
 
         print('Defining training Loss')
         self.loss = 0.0
-        with tf.control_dependencies([tf.compat.v1.assign(self.c[li], self.state[li][0]) for li in range(self.n_layers)]+
-                                    [tf.compat.v1.assign(self.h[li], self.state[li][1]) for li in range(self.n_layers)]):
-            for ui in range(self.num_unrollings):
-                self.loss += tf.reduce_mean(0.5*(self.split_outputs[ui]-self.train_outputs[ui])**2)
+        with tf.control_dependencies([tf.compat.v1.assign(self.c[li], self.state[li][0]) for li in range(n_layers)]+
+                                    [tf.compat.v1.assign(self.h[li], self.state[li][1]) for li in range(n_layers)]):
+            for ui in range(num_unrollings):
+                self.loss += tf.reduce_mean(0.5*(self.split_outputs[ui]-train_outputs[ui])**2)
 
         print('Learning rate decay operations')
         global_step = tf.Variable(0, trainable=False)
@@ -75,21 +60,21 @@ class LSTMOptimization:
 
         # Maintaining LSTM state for prediction stage
         sample_c, sample_h, initial_sample_state = [],[],[]
-        for li in range(self.n_layers):
-            sample_c.append(tf.Variable(tf.zeros([1, self.num_nodes[li]]), trainable=False))
-            sample_h.append(tf.Variable(tf.zeros([1, self.num_nodes[li]]), trainable=False))
+        for li in range(n_layers):
+            sample_c.append(tf.Variable(tf.zeros([1, num_nodes[li]]), trainable=False))
+            sample_h.append(tf.Variable(tf.zeros([1, num_nodes[li]]), trainable=False))
             initial_sample_state.append(tf.compat.v1.nn.rnn_cell.LSTMStateTuple(sample_c[li],sample_h[li]))
 
-        self.reset_sample_states = tf.group(*[tf.compat.v1.assign(sample_c[li],tf.zeros([1, self.num_nodes[li]])) for li in range(self.n_layers)],
-                                    *[tf.compat.v1.assign(sample_h[li],tf.zeros([1, self.num_nodes[li]])) for li in range(self.n_layers)])
+        self.reset_sample_states = tf.group(*[tf.compat.v1.assign(sample_c[li],tf.zeros([1, num_nodes[li]])) for li in range(n_layers)],
+                                    *[tf.compat.v1.assign(sample_h[li],tf.zeros([1, num_nodes[li]])) for li in range(n_layers)])
 
         sample_outputs, sample_state = tf.compat.v1.nn.dynamic_rnn(self.multi_cell, tf.expand_dims(self.sample_inputs,0),
                                         initial_state=tuple(initial_sample_state),
                                         time_major = True,
                                         dtype=tf.float32)
 
-        with tf.control_dependencies([tf.compat.v1.assign(sample_c[li],sample_state[li][0]) for li in range(self.n_layers)]+
-                                    [tf.compat.v1.assign(sample_h[li],sample_state[li][1]) for li in range(self.n_layers)]):  
+        with tf.control_dependencies([tf.compat.v1.assign(sample_c[li],sample_state[li][0]) for li in range(n_layers)]+
+                                    [tf.compat.v1.assign(sample_h[li],sample_state[li][1]) for li in range(n_layers)]):  
             self.sample_prediction = tf.compat.v1.nn.xw_plus_b(tf.reshape(sample_outputs,[1,-1]), self.w, self.b)
 
         print('\tAll done')

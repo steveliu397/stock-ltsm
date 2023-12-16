@@ -17,9 +17,8 @@ from lstm_optimization import LSTMOptimization
 # Outsourced code to run the LSTM, for consideration
 class LSTMRun:
 
-    def __init__(self, num_unrollings, batch_size, num_nodes, n_layers, dropout,
-                 epochs, valid_summary, n_predict_once, train_seq_length,
-                 loss_nondecrease_count, loss_nondecrease_threshold, data_gen, average_loss, test_points_seq,
+    def __init__(self, num_unrollings, batch_size, num_nodes, n_layers, dropout, epochs, valid_summary, n_predict_once, 
+                 train_seq_length, loss_nondecrease_count, loss_nondecrease_threshold, data_gen, average_loss, test_points_seq,
                  all_mid_data):
         D = 1 # The data is 1D in this model
 
