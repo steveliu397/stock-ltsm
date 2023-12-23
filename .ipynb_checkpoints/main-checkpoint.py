@@ -52,9 +52,9 @@ tf.compat.v1.reset_default_graph() # This is important in case you run this mult
 
 
 # Running the program
-epochs = 22
+epochs = 30
 valid_summary = 1 # Interval you make test predictions
-n_predict_once = 90 # Number of steps you continously predict for
+n_predict_once = 50 # Number of steps you continously predict for
 train_seq_length = len(train_data) # Full length of the training data
 
 x_axis_seq = []
@@ -73,7 +73,7 @@ data_gen = DataGeneratorSeq(train_data,batch_size,num_unrollings)
 
 
 # Points you start your test predictions from
-# Changed input here for testing SPY ---------------------------- need to integrate start, end and step into a method
+# Changed input here for testing ---------------------------- need to integrate start, end and step into a method
 test_points_seq = np.arange(5432,6032,50).tolist()
 
 
@@ -83,7 +83,8 @@ lstm_run = LSTMRun(num_unrollings, batch_size, num_nodes, n_layers, dropout, epo
 lstm_run.run()
 
 
-best_prediction_epoch = 22 # replace this with the epoch that you got the best results when running the plotting code
+
+best_prediction_epoch = 28 # replace this with the epoch that you got the best results when running the plotting code
 
 plt.figure(figsize = (18,18))
 plt.subplot(2,1,1)
@@ -100,7 +101,7 @@ for p_i,p in enumerate(predictions_over_time[::3]):
 plt.title('Evolution of Test Predictions Over Time',fontsize=18)
 plt.xlabel('Date',fontsize=18)
 plt.ylabel('Mid Price',fontsize=18)
-plt.xlim(5432,6032)
+plt.xlim(11000,12500)
 
 plt.subplot(2,1,2)
 
@@ -112,5 +113,5 @@ for xval,yval in zip(x_axis_seq,predictions_over_time[best_prediction_epoch]):
 plt.title('Best Test Predictions Over Time',fontsize=18)
 plt.xlabel('Date',fontsize=18)
 plt.ylabel('Mid Price',fontsize=18)
-plt.xlim(5432,6032)
+plt.xlim(11000,12500)
 plt.show()

@@ -19,7 +19,7 @@ class LSTMRun:
 
     def __init__(self, num_unrollings, batch_size, num_nodes, n_layers, dropout, epochs, valid_summary, n_predict_once, 
                  train_seq_length, loss_nondecrease_count, loss_nondecrease_threshold, data_gen, average_loss, test_points_seq,
-                 all_mid_data):
+                 all_mid_data, x_axis_seq, predictions_over_time):
         D = 1 # The data is 1D in this model
 
         train_inputs, train_outputs = [],[]
@@ -42,13 +42,13 @@ class LSTMRun:
         self.train_seq_length = train_seq_length
         self.train_mse_ot = []
         self.test_mse_ot = []
-        self.predictions_over_time = []
+        self.predictions_over_time = predictions_over_time
         
         self.loss_nondecrease_count = loss_nondecrease_count
         self.loss_nondecrease_threshold = loss_nondecrease_threshold
         self.data_gen = data_gen
         self.average_loss = average_loss
-        self.x_axis_seq = []
+        self.x_axis_seq = x_axis_seq
         self.test_points_seq = test_points_seq
 
         self.all_mid_data = all_mid_data
