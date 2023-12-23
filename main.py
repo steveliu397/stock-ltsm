@@ -54,7 +54,7 @@ tf.compat.v1.reset_default_graph() # This is important in case you run this mult
 # Running the program
 epochs = 22
 valid_summary = 1 # Interval you make test predictions
-n_predict_once = 90 # Number of steps you continously predict for
+n_predict_once = 50 # Number of steps you continously predict for
 train_seq_length = len(train_data) # Full length of the training data
 
 x_axis_seq = []
@@ -73,7 +73,8 @@ data_gen = DataGeneratorSeq(train_data,batch_size,num_unrollings)
 
 
 test_start = math.ceil(len(mid_prices) * 0.9) # Test prediction starting point
-test_points_seq = np.arange(test_start,len(mid_prices),50).tolist()
+test_end = len(mid_prices) - n_predict_once
+test_points_seq = np.arange(test_start,test_end,50).tolist()
 
 
 lstm_run = LSTMRun(num_unrollings, batch_size, num_nodes, n_layers, dropout, epochs, valid_summary, n_predict_once, 
@@ -82,9 +83,9 @@ lstm_run = LSTMRun(num_unrollings, batch_size, num_nodes, n_layers, dropout, epo
 lstm_run.run()
 
 
-best_prediction_epoch = 22 # replace this with the epoch that you got the best results when running the plotting code
+best_prediction_epoch = 21 # replace this with the epoch that you got the best results when running the plotting code
 
-plt.figure(figsize = (18,18))
+plt.figure(figsize = (9,9))
 plt.subplot(2,1,1)
 plt.plot(range(df.shape[0]),all_mid_data,color='b')
 
@@ -96,10 +97,10 @@ for p_i,p in enumerate(predictions_over_time[::3]):
     for xval,yval in zip(x_axis_seq,p):
         plt.plot(xval,yval,color='r',alpha=alpha[p_i])
 
-plt.title('Evolution of Test Predictions Over Time',fontsize=14)
-plt.xlabel('Date',fontsize=14)
-plt.ylabel('Mid Price',fontsize=14)
-plt.xlim(test_start,len(mid_prices))
+plt.title('Evolution of Test Predictions Over Time',fontsize=18)
+plt.xlabel('Date',fontsize=18)
+plt.ylabel('Mid Price',fontsize=18)
+plt.xlim(test_start,test_end + 300)
 
 plt.subplot(2,1,2)
 
@@ -108,8 +109,8 @@ plt.plot(range(df.shape[0]),all_mid_data,color='b')
 for xval,yval in zip(x_axis_seq,predictions_over_time[best_prediction_epoch]):
     plt.plot(xval,yval,color='r')
 
-plt.title('Best Test Predictions Over Time',fontsize=14)
-plt.xlabel('Date',fontsize=14)
-plt.ylabel('Mid Price',fontsize=14)
-plt.xlim(test_start,len(mid_prices))
+plt.title('Best Test Predictions Over Time',fontsize=18)
+plt.xlabel('Date',fontsize=18)
+plt.ylabel('Mid Price',fontsize=18)
+plt.xlim(test_start,test_end + 300)
 plt.show()
